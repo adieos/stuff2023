@@ -1,3 +1,3 @@
 # 2023
 
-stuff that i make in **2023** :)
+things that i made in **2023** :)
