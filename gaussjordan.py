@@ -64,6 +64,18 @@ if __name__ == "__main__":
     matrix[2] = oneify(matrix[2], 2)
     print(f"Sixth iteration: \n{matrix}")
 
+    # 7th iteration:
+    matrix[1] = zeroify(matrix[2], matrix[1], 2)
+    print(f"Seventh iteration: \n{matrix}\n")
+
+    # 8th iteration:
+    matrix[0] = zeroify(matrix[2], matrix[0], 2)
+    print(f"Eight iteration: \n{matrix}\n")
+
+    # 9th iteration:
+    matrix[0] = zeroify(matrix[1], matrix[0], 1)
+    print(f"Final result: \n{matrix}\n")
+
 
 
 
