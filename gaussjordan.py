@@ -13,7 +13,6 @@ def zeroify(arr1: list, arr2: list, index: int):
 
 def oneify(arr1: list, index:int):
     divisor = float(arr1[index])
-    print(divisor)
     return (arr1 / divisor) if divisor else arr1
 
 if __name__ == "__main__":
@@ -40,43 +39,23 @@ if __name__ == "__main__":
     print("Initial matrix:")
     print(matrix)
 
-    # 1st iteration
-    matrix[0] = oneify(matrix[0], 0)
-    print(f"First iteration: \n{matrix}\n")
+    iteration = 1
+    # iteration 1 - 6
+    for i in range(len(matrix)):
+        matrix[i] = oneify(matrix[i], i)
+        print(f"Iteration #{iteration}: \n{matrix}\n")
+        iteration += 1
 
-    # 2nd iteration
-    matrix[1] = zeroify(matrix[0], matrix[1], 0)
-    print(f"Second iteration: \n{matrix}\n")
+        for j in range(i+1, len(matrix)):
+            matrix[j] = zeroify(matrix[i], matrix[j], i)
+            print(f"Iteration #{iteration}: \n{matrix}\n")
+            iteration += 1
 
-    # 3rd iteration
-    matrix[2] = zeroify(matrix[0], matrix[2], 0)
-    print(f"Third iteration: \n{matrix}\n")
-
-    # 4th iteration
-    matrix[1] = oneify(matrix[1], 1)
-    print(f"Fourth iteration: \n{matrix}\n")
-
-    # 5th iteration
-    matrix[2] = zeroify(matrix[1], matrix[2], 1)
-    print(f"Fifth iteration: \n{matrix}\n")
-
-    # 6th iteration:
-    matrix[2] = oneify(matrix[2], 2)
-    print(f"Sixth iteration: \n{matrix}")
-
-    # 7th iteration:
-    matrix[1] = zeroify(matrix[2], matrix[1], 2)
-    print(f"Seventh iteration: \n{matrix}\n")
-
-    # 8th iteration:
-    matrix[0] = zeroify(matrix[2], matrix[0], 2)
-    print(f"Eight iteration: \n{matrix}\n")
-
-    # 9th iteration:
-    matrix[0] = zeroify(matrix[1], matrix[0], 1)
-    print(f"Final result: \n{matrix}\n")
-
-
-
+    # iteration 7 - 9
+    for i in range(len(matrix) - 1, 0, -1):
+        for j in range(i-1, -1, -1):
+            matrix[j] = zeroify(matrix[i], matrix[j], i)
+            print(f"Iteration #{iteration}: \n{matrix}\n")
+            iteration += 1
 
     os.system("pause")
