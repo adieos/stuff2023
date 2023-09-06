@@ -1,6 +1,7 @@
 import numpy as np
 import regex as re
-import os
+import time
+import sys
 
 class InvalidEquation(Exception):
     def __init__(self, message):
@@ -34,8 +35,8 @@ def main():
                 coefficients.append(coeff)
         except InvalidEquation as e:
             print(e.message)
-            os.system("pause")
-            exit(1)
+            time.sleep(5)
+            sys.exit(1)
 
         matrix = np.array(coefficients, dtype=float)
         print("Initial matrix:")
