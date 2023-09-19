@@ -5,7 +5,7 @@ pygame.mixer.init()
 
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("my frist game") # title
+pygame.display.set_caption("spaceship batle pew pew") # title
 BORDER = pygame.Rect((WIDTH//2)-5, 0, 10, HEIGHT)
 
 WHITE = (255,255,255)
