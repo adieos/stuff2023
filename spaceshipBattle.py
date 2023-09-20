@@ -55,7 +55,7 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_HP, yellow_HP):
 
 def yellow_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_a] and yellow.x - VEL > 0: # LEFT YELLOW
-            yellow.x -= VEL
+        yellow.x -= VEL
     if keys_pressed[pygame.K_d] and yellow.x + VEL + yellow.width < BORDER.x: # RIGHT YELLOW
         yellow.x += VEL
     if keys_pressed[pygame.K_s] and yellow.y + VEL + yellow.height < HEIGHT - 15: # DOWN YELLOW
@@ -113,7 +113,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-                pygame.quit()
+                pygame.quit() # coded this way to ensure game can restart after someone won
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LCTRL and len(yellow_bullets) < MAX_BULLETS:

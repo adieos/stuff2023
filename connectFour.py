@@ -26,6 +26,8 @@ def isWin(player):
         for j in range(3,7):
             if board[i][j] == player and board[i+1][j-1] == player and board[i+2][j-2] == player and board[i+3][j-3] == player:
                 return True
+            
+
 while not game_over:
     # Ask for players' input
     ans = input("Player 1: ") if turn % 2 else input("Player 2: ") 
