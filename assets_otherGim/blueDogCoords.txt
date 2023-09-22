@@ -1,0 +1,1 @@
+[(480, 60, "vertical"), (480, 120, "horizontal"), (540, 60, "horizontal"), (540, 120, "vertical")]

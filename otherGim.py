@@ -3,11 +3,14 @@ import os
 import random
 import ast
 pygame.init()
-# NOTE: TO DO: LOOK CHATGPT, AST THINGY TO IMPORT LIST!!!
 
-with open('boxCoords.txt', 'r') as file:
+with open('assets_otherGim\\boxCoords.txt', 'r') as file:
     box_coords = file.read()
  
+with open('assets_otherGim\\blueDogCoords.txt', 'r') as file:
+    blue_dog_coords = file.read()
+
+ # display
 WIDTH, HEIGHT = 900, 540
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 5
@@ -20,25 +23,40 @@ BLACK = (0,0,0)
 LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
 
-BORDER = pygame.Rect((WIDTH//2)-5, 0, 10, HEIGHT)
 BOX_COORDS = ast.literal_eval(box_coords)
+BLUE_DOG_COORDS = ast.literal_eval(blue_dog_coords)
 VEL = 60
+ORANGE_CAT_MOVE = 0
 
+# images
 CAT_WIDTH = 40
 CAT_HEIGHT = 40
 BOX_WIDTH = 60
 BOX_HEIGHT = 60
+DOG_WIDTH = 60
+DOG_HEIGHT = 60
 CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
 CAT = pygame.transform.scale(CAT_RAW, (CAT_WIDTH, CAT_HEIGHT))
-ENEMY_RAW = CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
-ENEMY = pygame.transform.scale(ENEMY_RAW, (CAT_WIDTH, CAT_HEIGHT))
+ORANGE_CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
+ORANGE_CAT = pygame.transform.scale(ORANGE_CAT_RAW, (CAT_WIDTH, CAT_HEIGHT))
 BOX_RAW = pygame.image.load(os.path.join('assets_otherGim', 'box.png'))
 BOX = pygame.transform.scale(BOX_RAW, (BOX_WIDTH, BOX_HEIGHT))
+BLUEDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueDog.png'))
+BLUEDOG = pygame.transform.scale(BLUEDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
 
-def draw_window(cat, enemy, boxes):
+class BlueDog:
+    def __init__(self, rect, status):
+        self.rect = rect
+        self.status = status
+
+def draw_window(cat, orange_cat, boxes, blue_dogs):
     draw_grid()
     WIN.blit(CAT, (cat.x, cat.y))
-    WIN.blit(ENEMY, (enemy.x, enemy.y)) # Turning this off will simply make the enemy invisible
+    WIN.blit(ORANGE_CAT, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
+    for dog in blue_dogs:
+        WIN.blit(BLUEDOG, (dog.x, dog.y))
+        if cat.colliderect(dog): 
+            print("COLLIDED WITH DOG WOOF WOOF!")
     for box in boxes:
         WIN.blit(BOX, (box.x, box.y))
     pygame.display.update()
@@ -75,23 +93,34 @@ def move_cat(keys_pressed, cat, boxes):
         for box in boxes:
             if cat.colliderect(box): cat.y -= VEL
 
-def move_enemy(enemy):
+def move_orange_cat(orange_cat):
     move = random.randint(1,4) # LEFT, UP, RIGHT, DOWN
-    if move == 1 and enemy.x - VEL > 0:
-        enemy.x -= VEL
-    if move == 2 and enemy.y - VEL > 0:
-        enemy.y -= VEL
-    if move == 3 and enemy.x + VEL < WIDTH:
-        enemy.x += VEL
-    if move == 4 and enemy.y + VEL < HEIGHT:
-        enemy.y += VEL
+    if not ORANGE_CAT_MOVE : return
+    if move == 1 and orange_cat.x - VEL > 0:
+        orange_cat.x -= VEL
+    if move == 2 and orange_cat.y - VEL > 0:
+        orange_cat.y -= VEL
+    if move == 3 and orange_cat.x + VEL < WIDTH:
+        orange_cat.x += VEL
+    if move == 4 and orange_cat.y + VEL < HEIGHT:
+        orange_cat.y += VEL
+
+def move_blue_dog(blue_dog):
+    if blue_dog.status == "vertical":
+        pass
 
 def main():
     cat = pygame.Rect(10,10, CAT_WIDTH, CAT_HEIGHT)
-    enemy = pygame.Rect(WIDTH-50, HEIGHT-50, CAT_WIDTH, CAT_HEIGHT)
+    orange_cat = pygame.Rect(WIDTH-50, HEIGHT-50, CAT_WIDTH, CAT_HEIGHT)
     boxes = []
+    blue_dogs = []
     for i in BOX_COORDS:
         boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
+    bluedogindex = 0
+    for i in BLUE_DOG_COORDS:
+        blue_dogs.append(pygame.Rect(i[0], i[1], DOG_WIDTH, DOG_WIDTH))
+        #blue_dogs[bluedogindex].status = i[2]
+        bluedogindex += 1
 
     cat_HP = 10
     running = True
@@ -106,10 +135,12 @@ def main():
 
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
-        move_enemy(enemy)
-        draw_window(cat, enemy, boxes)
+        move_orange_cat(orange_cat)
+        draw_window(cat, orange_cat, boxes, blue_dogs)
 
-        if cat.colliderect(enemy) : cat_HP -= 1 # WIP
+        if cat.colliderect(orange_cat) :
+            cat_HP -= 1 # WIP
+            print("COLLIDED! WITH CAT")
 
 if __name__ == "__main__":
     main()
