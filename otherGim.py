@@ -4,6 +4,8 @@ import random
 import ast
 pygame.init()
 
+# lorem ipsum dolor sit amet
+
 with open('assets_otherGim\\boxCoords.txt', 'r') as file:
     box_coords = file.read()
  
