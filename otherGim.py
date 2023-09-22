@@ -1,8 +1,13 @@
 import pygame
 import os
 import random
+import ast
 pygame.init()
+# NOTE: TO DO: LOOK CHATGPT, AST THINGY TO IMPORT LIST!!!
 
+with open('boxCoords.txt', 'r') as file:
+    box_coords = file.read()
+ 
 WIDTH, HEIGHT = 900, 540
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 5
@@ -16,7 +21,7 @@ LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
 
 BORDER = pygame.Rect((WIDTH//2)-5, 0, 10, HEIGHT)
-BOX_COORDS = [(240,60), (240,0), (240,120), (0, 60), (120, 60), (0, 180), (60, 180), (120, 180)]
+BOX_COORDS = ast.literal_eval(box_coords)
 VEL = 60
 
 CAT_WIDTH = 40
