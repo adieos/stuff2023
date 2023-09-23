@@ -1,1 +1,4 @@
-[(480, 60, "vertical"), (480, 120, "horizontal"), (540, 60, "horizontal"), (540, 120, "vertical")]
+[
+(180, 60, "vertical", "DOWN"), 
+(180, 300, "horizontal", "LEFT")
+]

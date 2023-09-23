@@ -3,9 +3,9 @@ import os
 import random
 import ast
 pygame.init()
+# NOTE: FIX move_blue_dog() blud. IDFK WHY THEY DISAPPEAR !!?????????
 
 # lorem ipsum dolor sit amet
-
 with open('assets_otherGim\\boxCoords.txt', 'r') as file:
     box_coords = file.read()
  
@@ -25,9 +25,11 @@ BLACK = (0,0,0)
 LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
 
+# others
 BOX_COORDS = ast.literal_eval(box_coords)
 BLUE_DOG_COORDS = ast.literal_eval(blue_dog_coords)
 VEL = 60
+DOG_VEL = 25
 ORANGE_CAT_MOVE = 0
 
 # images
@@ -47,16 +49,17 @@ BLUEDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueDog.png'))
 BLUEDOG = pygame.transform.scale(BLUEDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
 
 class BlueDog:
-    def __init__(self, rect, status):
+    def __init__(self, rect, status, initial):
         self.rect = rect
         self.status = status
+        self.initial = initial
 
 def draw_window(cat, orange_cat, boxes, blue_dogs):
     draw_grid()
     WIN.blit(CAT, (cat.x, cat.y))
     WIN.blit(ORANGE_CAT, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
     for dog in blue_dogs:
-        WIN.blit(BLUEDOG, (dog.x, dog.y))
+        WIN.blit(BLUEDOG, (dog.rect.x, dog.rect.y))
         if cat.colliderect(dog): 
             print("COLLIDED WITH DOG WOOF WOOF!")
     for box in boxes:
@@ -107,9 +110,36 @@ def move_orange_cat(orange_cat):
     if move == 4 and orange_cat.y + VEL < HEIGHT:
         orange_cat.y += VEL
 
-def move_blue_dog(blue_dog):
-    if blue_dog.status == "vertical":
-        pass
+def move_blue_dog(blue_dogs, boxes):
+    for dog in blue_dogs:
+        if dog.status == "vertical":
+            if dog.initial == "UP":
+                dog.rect.y -= DOG_VEL
+                for box in boxes:
+                    if dog.rect.colliderect(box) or dog.rect.y - DOG_VEL < 0 :
+                        dog.rect.y += DOG_VEL
+                        dog.initial = "DOWN"
+            elif dog.initial == "DOWN":
+                dog.rect.y += DOG_VEL
+                for box in boxes:
+                    if dog.rect.colliderect(box) or dog.rect.y + dog.rect.height + DOG_VEL > HEIGHT:
+                        dog.rect.y -= DOG_VEL
+                        dog.initial = "UP"
+        elif dog.status == "horizontal":
+            if dog.initial == "LEFT":
+                dog.rect.x -= DOG_VEL
+                for box in boxes:
+                    if dog.rect.colliderect(box) or dog.rect.x - DOG_VEL < 0 :
+                        dog.rect.x += DOG_VEL
+                        dog.initial = "RIGHT"
+            elif dog.initial == "RIGHT":
+                dog.rect.x += DOG_VEL
+                for box in boxes:
+                    if dog.rect.colliderect(box) or dog.rect.x + dog.rect.width + DOG_VEL > WIDTH:
+                        dog.rect.x -= DOG_VEL
+                        dog.initial = "LEFT"
+            
+            
 
 def main():
     cat = pygame.Rect(10,10, CAT_WIDTH, CAT_HEIGHT)
@@ -118,11 +148,9 @@ def main():
     blue_dogs = []
     for i in BOX_COORDS:
         boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
-    bluedogindex = 0
     for i in BLUE_DOG_COORDS:
-        blue_dogs.append(pygame.Rect(i[0], i[1], DOG_WIDTH, DOG_WIDTH))
-        #blue_dogs[bluedogindex].status = i[2]
-        bluedogindex += 1
+        dog = BlueDog(pygame.Rect(i[0], i[1], DOG_WIDTH, DOG_HEIGHT), i[2], i[3])
+        blue_dogs.append(dog)
 
     cat_HP = 10
     running = True
@@ -138,6 +166,7 @@ def main():
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
         move_orange_cat(orange_cat)
+        move_blue_dog(blue_dogs, boxes)
         draw_window(cat, orange_cat, boxes, blue_dogs)
 
         if cat.colliderect(orange_cat) :
