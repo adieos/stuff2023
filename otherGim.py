@@ -3,7 +3,9 @@ import os
 import random
 import ast
 pygame.init()
-# NOTE: FIX move_blue_dog() blud. IDFK WHY THEY DISAPPEAR !!?????????
+pygame.mixer.init()
+pygame.font.init()
+# NOTE: do the death() function and maybe key?
 
 # lorem ipsum dolor sit amet
 with open('assets_otherGim\\boxCoords.txt', 'r') as file:
@@ -24,6 +26,7 @@ WHITE = (255,255,255)
 BLACK = (0,0,0)
 LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
+RED = (255,0,0)
 
 # others
 BOX_COORDS = ast.literal_eval(box_coords)
@@ -31,6 +34,15 @@ BLUE_DOG_COORDS = ast.literal_eval(blue_dog_coords)
 VEL = 60
 DOG_VEL = 25
 ORANGE_CAT_MOVE = 0
+HIT_BLUE_DOG_EVENT = pygame.USEREVENT + 1
+DEATH_FONT = pygame.font.SysFont('comicsans', 80)
+
+# sounds
+BAKSO_MALAM_OST = pygame.mixer.Sound(os.path.join('assets_otherGim', 'baksoMalam.mp3'))
+BAKSO_PAGI_OST = pygame.mixer.Sound(os.path.join('assets_otherGim', 'baksoPagi.mp3'))
+BAKSO_PAGI_OST.set_volume(0.25)
+HIT_BLUE_DOG_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'vineBoom.mp3'))
+KEY_PICKUP_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'keyPick.mp3'))
 
 # images
 CAT_WIDTH = 40
@@ -60,8 +72,8 @@ def draw_window(cat, orange_cat, boxes, blue_dogs):
     WIN.blit(ORANGE_CAT, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
     for dog in blue_dogs:
         WIN.blit(BLUEDOG, (dog.rect.x, dog.rect.y))
-        if cat.colliderect(dog): 
-            print("COLLIDED WITH DOG WOOF WOOF!")
+        if cat.colliderect(dog):  # COLLISION !! COLLISION !! COLLISION !!
+            pygame.event.post(pygame.event.Event(HIT_BLUE_DOG_EVENT))
     for box in boxes:
         WIN.blit(BOX, (box.x, box.y))
     pygame.display.update()
@@ -116,13 +128,13 @@ def move_blue_dog(blue_dogs, boxes):
             if dog.initial == "UP":
                 dog.rect.y -= DOG_VEL
                 for box in boxes:
-                    if dog.rect.colliderect(box) or dog.rect.y - DOG_VEL < 0 :
+                    if dog.rect.colliderect(box) or dog.rect.y - DOG_VEL  + 38 < 0 :
                         dog.rect.y += DOG_VEL
                         dog.initial = "DOWN"
             elif dog.initial == "DOWN":
                 dog.rect.y += DOG_VEL
                 for box in boxes:
-                    if dog.rect.colliderect(box) or dog.rect.y + dog.rect.height + DOG_VEL > HEIGHT:
+                    if dog.rect.colliderect(box) or dog.rect.y + 30 + DOG_VEL > HEIGHT:
                         dog.rect.y -= DOG_VEL
                         dog.initial = "UP"
         elif dog.status == "horizontal":
@@ -138,10 +150,20 @@ def move_blue_dog(blue_dogs, boxes):
                     if dog.rect.colliderect(box) or dog.rect.x + dog.rect.width + DOG_VEL > WIDTH:
                         dog.rect.x -= DOG_VEL
                         dog.initial = "LEFT"
+
+def death(text):
+    draw_text = DEATH_FONT.render(text, 1, RED)
+    background_text = pygame.Surface((draw_text.get_width(), draw_text.get_height()))
+    background_text.fill(BLACK)
+    background_text.blit(draw_text, (0,0))
+    WIN.blit(background_text, (WIDTH/2 - draw_text.get_width()/2, HEIGHT/2 - draw_text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(5000)
             
             
 
 def main():
+    BAKSO_PAGI_OST.play()
     cat = pygame.Rect(10,10, CAT_WIDTH, CAT_HEIGHT)
     orange_cat = pygame.Rect(WIDTH-50, HEIGHT-50, CAT_WIDTH, CAT_HEIGHT)
     boxes = []
@@ -162,6 +184,12 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 running = False
+            
+            if event.type == HIT_BLUE_DOG_EVENT:
+                HIT_BLUE_DOG_SFX.play()
+                BAKSO_PAGI_OST.stop()
+                death("YOU DIED!")
+                main()
 
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
@@ -170,7 +198,7 @@ def main():
         draw_window(cat, orange_cat, boxes, blue_dogs)
 
         if cat.colliderect(orange_cat) :
-            cat_HP -= 1 # WIP
+            cat_HP -= 1 # WIP COLLISION !! COLLISION !! COLLISION !!
             print("COLLIDED! WITH CAT")
 
 if __name__ == "__main__":
