@@ -7,7 +7,7 @@ pygame.mixer.init()
 pygame.font.init()
 MODE = "ROUGH" # "ROUGH" or "SMOOTH"
 
-# NOTE: MOVING SPIRTE?? KEY !!
+# NOTE: MOVING SPIRTE?? KEY is resolved, NO MORE THAN 1 COLOR OF KEY!!!
 
 # lorem ipsum dolor sit amet
 with open('assets_otherGim\\boxCoords.txt', 'r') as file:
@@ -41,6 +41,7 @@ DOG_VEL = 25
 ORANGE_CAT_MOVE = 0
 HIT_BLUE_DOG_EVENT = pygame.USEREVENT + 1
 BLUE_KEY_PICK_EVENT = pygame.USEREVENT + 2
+BLUE_LOCK_UNLOCK_EVENT = pygame.USEREVENT + 3
 DEATH_FONT = pygame.font.SysFont('comicsans', 80)
 
 # sounds
@@ -49,6 +50,7 @@ BAKSO_PAGI_OST = pygame.mixer.Sound(os.path.join('assets_otherGim', 'baksoPagi.m
 BAKSO_PAGI_OST.set_volume(0.25)
 HIT_BLUE_DOG_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'vineBoom.mp3'))
 KEY_PICKUP_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'keyPick.mp3'))
+LOCK_UNLOCK_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'unlock.mp3'))
 
 # images
 CAT_WIDTH = 40
@@ -69,7 +71,8 @@ BLUEDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueDog.png'))
 BLUEDOG = pygame.transform.scale(BLUEDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
 BLUEKEY_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueKey.png'))
 BLUEKEY = pygame.transform.scale(BLUEKEY_RAW, (KEY_WIDTH, KEY_HEIGHT))
-
+BLUELOCK_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueLock.png'))
+BLUELOCK = pygame.transform.scale(BLUELOCK_RAW, (KEY_WIDTH, KEY_HEIGHT))
 
 class BlueDog:
     def __init__(self, rect, status, initial):
@@ -77,8 +80,10 @@ class BlueDog:
         self.status = status
         self.initial = initial
 
-def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key):
+def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock):
     draw_grid()
+    if (blue_key) : WIN.blit(BLUEKEY, (blue_key.x, blue_key.y))
+    if (blue_lock) : WIN.blit(BLUELOCK, (blue_lock.x, blue_lock.y))
     WIN.blit(CAT, (cat.x, cat.y))
     WIN.blit(ORANGE_CAT, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
     for dog in blue_dogs:
@@ -87,7 +92,7 @@ def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key):
             pygame.event.post(pygame.event.Event(HIT_BLUE_DOG_EVENT))
     for box in boxes:
         WIN.blit(BOX, (box.x, box.y))
-    if (blue_key) : WIN.blit(BLUEKEY, (blue_key.x, blue_key.y))
+    
     
     pygame.display.update()
 
@@ -178,6 +183,14 @@ def pickup(cat, blue_key): # handles item pickup
     if cat.colliderect(blue_key):
         pygame.event.post(pygame.event.Event(BLUE_KEY_PICK_EVENT))
         
+def unlock(cat, blue_lock, has_blue_key):
+    if not blue_lock: return
+    if cat.colliderect(blue_lock):
+        if has_blue_key:
+            pygame.event.post(pygame.event.Event(BLUE_LOCK_UNLOCK_EVENT))
+        else:
+            cat.x -= VEL
+
 
 def main():
     BAKSO_PAGI_OST.play()
@@ -186,6 +199,7 @@ def main():
     boxes = []
     blue_dogs = []
     blue_key = pygame.Rect(360, 360, KEY_WIDTH, KEY_HEIGHT)
+    blue_lock = pygame.Rect(240, 180, BOX_WIDTH, BOX_HEIGHT)
 
     for i in BOX_COORDS:
         boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
@@ -193,7 +207,7 @@ def main():
         dog = BlueDog(pygame.Rect(i[0], i[1], DOG_WIDTH, DOG_HEIGHT), i[2], i[3])
         blue_dogs.append(dog)
 
-    cat_HP = 10
+    has_blue_key = False
     running = True
     clock = pygame.time.Clock()
 
@@ -202,6 +216,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                quit()
                 running = False
             
             if event.type == HIT_BLUE_DOG_EVENT:
@@ -213,20 +228,32 @@ def main():
             if event.type == BLUE_KEY_PICK_EVENT:
                 KEY_PICKUP_SFX.play()
                 blue_key = None
+                has_blue_key = True
+
+            if event.type == BLUE_LOCK_UNLOCK_EVENT:
+                LOCK_UNLOCK_SFX.play()
+                blue_lock = None
 
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
         move_orange_cat(orange_cat)
         move_blue_dog(blue_dogs, boxes)
         pickup(cat, blue_key)
-        draw_window(cat, orange_cat, boxes, blue_dogs, blue_key)
+        unlock (cat, blue_lock, has_blue_key)
+        draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock)
 
         if cat.colliderect(orange_cat) :
-            cat_HP -= 1 # WIP COLLISION !! COLLISION !! COLLISION !!
+            # WIP COLLISION !! COLLISION !! COLLISION !!
             print("COLLIDED! WITH CAT")
 
 if __name__ == "__main__":
     if MODE == "SMOOTH": FPS, VEL, DOG_VEL = 60, 5, 2
     if MODE == "ROUGH": FPS, VEL, DOG_VEL = 5,60, 25
     main()
-    # note 1: when making levels, update BOX_COORDS constant
+
+'''
+issues: 
+1. there can only be one color of key and box because yes
+2. this game isnt going to be developed into multiple levels for the time being. i plan on making platformers instead :P
+'''
+# notes
