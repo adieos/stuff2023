@@ -1,4 +1,5 @@
 __pycache__/
+tutor/
 dist/
 testamigo.py
 opener.py

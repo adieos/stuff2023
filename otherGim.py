@@ -5,7 +5,9 @@ import ast
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
-# NOTE: do the death() function and maybe key?
+MODE = "ROUGH" # "ROUGH" or "SMOOTH"
+
+# NOTE: MOVING SPIRTE?? KEY !!
 
 # lorem ipsum dolor sit amet
 with open('assets_otherGim\\boxCoords.txt', 'r') as file:
@@ -28,13 +30,17 @@ LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
 RED = (255,0,0)
 
-# others
+# coords
 BOX_COORDS = ast.literal_eval(box_coords)
 BLUE_DOG_COORDS = ast.literal_eval(blue_dog_coords)
+BLUE_KEY_COORD = (360, 360)
+
+# others
 VEL = 60
 DOG_VEL = 25
 ORANGE_CAT_MOVE = 0
 HIT_BLUE_DOG_EVENT = pygame.USEREVENT + 1
+BLUE_KEY_PICK_EVENT = pygame.USEREVENT + 2
 DEATH_FONT = pygame.font.SysFont('comicsans', 80)
 
 # sounds
@@ -51,6 +57,8 @@ BOX_WIDTH = 60
 BOX_HEIGHT = 60
 DOG_WIDTH = 60
 DOG_HEIGHT = 60
+KEY_WIDTH, KEY_HEIGHT = 60, 60
+
 CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
 CAT = pygame.transform.scale(CAT_RAW, (CAT_WIDTH, CAT_HEIGHT))
 ORANGE_CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
@@ -59,6 +67,9 @@ BOX_RAW = pygame.image.load(os.path.join('assets_otherGim', 'box.png'))
 BOX = pygame.transform.scale(BOX_RAW, (BOX_WIDTH, BOX_HEIGHT))
 BLUEDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueDog.png'))
 BLUEDOG = pygame.transform.scale(BLUEDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
+BLUEKEY_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueKey.png'))
+BLUEKEY = pygame.transform.scale(BLUEKEY_RAW, (KEY_WIDTH, KEY_HEIGHT))
+
 
 class BlueDog:
     def __init__(self, rect, status, initial):
@@ -66,7 +77,7 @@ class BlueDog:
         self.status = status
         self.initial = initial
 
-def draw_window(cat, orange_cat, boxes, blue_dogs):
+def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key):
     draw_grid()
     WIN.blit(CAT, (cat.x, cat.y))
     WIN.blit(ORANGE_CAT, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
@@ -76,6 +87,8 @@ def draw_window(cat, orange_cat, boxes, blue_dogs):
             pygame.event.post(pygame.event.Event(HIT_BLUE_DOG_EVENT))
     for box in boxes:
         WIN.blit(BOX, (box.x, box.y))
+    if (blue_key) : WIN.blit(BLUEKEY, (blue_key.x, blue_key.y))
+    
     pygame.display.update()
 
 def draw_grid():
@@ -160,7 +173,11 @@ def death(text):
     pygame.display.update()
     pygame.time.delay(5000)
             
-            
+def pickup(cat, blue_key): # handles item pickup
+    if (not blue_key): return
+    if cat.colliderect(blue_key):
+        pygame.event.post(pygame.event.Event(BLUE_KEY_PICK_EVENT))
+        
 
 def main():
     BAKSO_PAGI_OST.play()
@@ -168,6 +185,8 @@ def main():
     orange_cat = pygame.Rect(WIDTH-50, HEIGHT-50, CAT_WIDTH, CAT_HEIGHT)
     boxes = []
     blue_dogs = []
+    blue_key = pygame.Rect(360, 360, KEY_WIDTH, KEY_HEIGHT)
+
     for i in BOX_COORDS:
         boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
     for i in BLUE_DOG_COORDS:
@@ -190,17 +209,24 @@ def main():
                 BAKSO_PAGI_OST.stop()
                 death("YOU DIED!")
                 main()
+            
+            if event.type == BLUE_KEY_PICK_EVENT:
+                KEY_PICKUP_SFX.play()
+                blue_key = None
 
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
         move_orange_cat(orange_cat)
         move_blue_dog(blue_dogs, boxes)
-        draw_window(cat, orange_cat, boxes, blue_dogs)
+        pickup(cat, blue_key)
+        draw_window(cat, orange_cat, boxes, blue_dogs, blue_key)
 
         if cat.colliderect(orange_cat) :
             cat_HP -= 1 # WIP COLLISION !! COLLISION !! COLLISION !!
             print("COLLIDED! WITH CAT")
 
 if __name__ == "__main__":
+    if MODE == "SMOOTH": FPS, VEL, DOG_VEL = 60, 5, 2
+    if MODE == "ROUGH": FPS, VEL, DOG_VEL = 5,60, 25
     main()
     # note 1: when making levels, update BOX_COORDS constant
