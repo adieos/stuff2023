@@ -1,4 +1,8 @@
 [
 (180, 60, "vertical", "DOWN"), 
-(180, 300, "horizontal", "LEFT")
+(180, 300, "horizontal", "LEFT"),
+(420, 0, "horizontal", "LEFT"),
+(480, 120, "horizontal", "RIGHT"),
+(540, 360, "vertical", "DOWN"),
+(660, 480, "vertical", "UP")
 ]
