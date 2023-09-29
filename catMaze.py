@@ -6,12 +6,12 @@ pygame.init()
 pygame.mixer.init()
 pygame.font.init()
 MODE = "SMOOTH" # "ROUGH" or "SMOOTH"
-# FINISHING: MAKE GHOST BARRIER AND END PORTAL!
+# FINISHING: finish.mp3 and finish.png, and maybe reposition the finish tile?
 
-with open('assets_otherGim\\boxCoords.txt', 'r') as file:
+with open('assets_catMaze\\boxCoords.txt', 'r') as file:
     box_coords = file.read()
  
-with open('assets_otherGim\\blueDogCoords.txt', 'r') as file:
+with open('assets_catMaze\\blueDogCoords.txt', 'r') as file:
     blue_dog_coords = file.read()
 
  # display
@@ -19,7 +19,7 @@ WIDTH, HEIGHT = 900, 540
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 5
 pygame.display.set_caption("stupid cat game")
-pygame.display.set_icon(pygame.image.load(os.path.join('assets_otherGim', 'cat.png')))
+pygame.display.set_icon(pygame.image.load(os.path.join('assets_catMaze', 'cat.png')))
 
 # colors
 WHITE = (255,255,255)
@@ -27,11 +27,13 @@ BLACK = (0,0,0)
 LGREEN = (37, 196, 45)
 DGREEN = (29, 153, 35)
 RED = (255,0,0)
+GREEN = (0, 255, 0)
 
 # coords
 BOX_COORDS = ast.literal_eval(box_coords)
 BLUE_DOG_COORDS = ast.literal_eval(blue_dog_coords)
 BLUE_KEY_COORD = (360, 360)
+GHOST_BOX_COORDS = [(540, 420), (660, 420), (840, 420)]
 
 # others
 last_trigger = 0 # for the red dog movement bleeehhh
@@ -50,14 +52,18 @@ BLUE_LOCK_UNLOCK_EVENT = pygame.USEREVENT + 3
 MOVE_RED_DOG_EVENT = pygame.USEREVENT + 4
 RED_KEY_PICK_EVENT = pygame.USEREVENT + 5
 RED_LOCK_UNLOCK_EVENT = pygame.USEREVENT + 6
+WIN_EVENT = pygame.USEREVENT + 7
 
 # sounds
-BAKSO_MALAM_OST = pygame.mixer.Sound(os.path.join('assets_otherGim', 'baksoMalam.mp3'))
-BAKSO_PAGI_OST = pygame.mixer.Sound(os.path.join('assets_otherGim', 'baksoPagi.mp3'))
-BAKSO_MALAM_OST.set_volume(0)
-HIT_BLUE_DOG_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'vineBoom.mp3'))
-KEY_PICKUP_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'keyPick.mp3'))
-LOCK_UNLOCK_SFX = pygame.mixer.Sound(os.path.join('assets_otherGim', 'unlock.mp3'))
+BAKSO_MALAM_OST = pygame.mixer.Sound(os.path.join('assets_catMaze', 'baksoMalam.mp3'))
+BAKSO_PAGI_OST = pygame.mixer.Sound(os.path.join('assets_catMaze', 'baksoPagi.mp3'))
+LAGU = BAKSO_PAGI_OST
+LAGU.set_volume(0.25)
+HIT_BLUE_DOG_SFX = pygame.mixer.Sound(os.path.join('assets_catMaze', 'vineBoom.mp3'))
+KEY_PICKUP_SFX = pygame.mixer.Sound(os.path.join('assets_catMaze', 'keyPick.mp3'))
+LOCK_UNLOCK_SFX = pygame.mixer.Sound(os.path.join('assets_catMaze', 'unlock.mp3'))
+WIN_SFX = pygame.mixer.Sound(os.path.join('assets_catMaze', 'finish.mp3'))
+WIN_SFX.set_volume(0.60)
 
 # images
 CAT_WIDTH = 40
@@ -68,24 +74,26 @@ DOG_WIDTH = 50
 DOG_HEIGHT = 50
 KEY_WIDTH, KEY_HEIGHT = 60, 60
 
-CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
+CAT_RAW = pygame.image.load(os.path.join('assets_catMaze', 'cat.png'))
 CAT = pygame.transform.scale(CAT_RAW, (CAT_WIDTH, CAT_HEIGHT))
-ORANGE_CAT_RAW = pygame.image.load(os.path.join('assets_otherGim', 'cat.png'))
+ORANGE_CAT_RAW = pygame.image.load(os.path.join('assets_catMaze', 'cat.png'))
 ORANGE_CAT = pygame.transform.scale(ORANGE_CAT_RAW, (CAT_WIDTH, CAT_HEIGHT))
-BOX_RAW = pygame.image.load(os.path.join('assets_otherGim', 'box.png'))
+BOX_RAW = pygame.image.load(os.path.join('assets_catMaze', 'box.png'))
 BOX = pygame.transform.scale(BOX_RAW, (BOX_WIDTH, BOX_HEIGHT))
-BLUEDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueDog.png'))
+BLUEDOG_RAW = pygame.image.load(os.path.join('assets_catMaze', 'blueDog.png'))
 BLUEDOG = pygame.transform.scale(BLUEDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
-REDDOG_RAW = pygame.image.load(os.path.join('assets_otherGim', 'redDog.png'))
+REDDOG_RAW = pygame.image.load(os.path.join('assets_catMaze', 'redDog.png'))
 REDDOG = pygame.transform.scale(REDDOG_RAW, (DOG_WIDTH, DOG_HEIGHT))
-BLUEKEY_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueKey.png'))
+BLUEKEY_RAW = pygame.image.load(os.path.join('assets_catMaze', 'blueKey.png'))
 BLUEKEY = pygame.transform.scale(BLUEKEY_RAW, (KEY_WIDTH, KEY_HEIGHT))
-BLUELOCK_RAW = pygame.image.load(os.path.join('assets_otherGim', 'blueLock.png'))
+BLUELOCK_RAW = pygame.image.load(os.path.join('assets_catMaze', 'blueLock.png'))
 BLUELOCK = pygame.transform.scale(BLUELOCK_RAW, (KEY_WIDTH, KEY_HEIGHT))
-REDKEY_RAW = pygame.image.load(os.path.join('assets_otherGim', 'redKey.png'))
+REDKEY_RAW = pygame.image.load(os.path.join('assets_catMaze', 'redKey.png'))
 REDKEY = pygame.transform.scale(REDKEY_RAW, (KEY_WIDTH, KEY_HEIGHT))
-REDLOCK_RAW = pygame.image.load(os.path.join('assets_otherGim', 'redLock.png'))
+REDLOCK_RAW = pygame.image.load(os.path.join('assets_catMaze', 'redLock.png'))
 REDLOCK = pygame.transform.scale(REDLOCK_RAW, (KEY_WIDTH, KEY_HEIGHT))
+FINISH_RAW = pygame.image.load(os.path.join('assets_catMaze', 'finish.png'))
+FINISH = pygame.transform.scale(FINISH_RAW, (60, 60))
 
 class BlueDog:
     def __init__(self, rect, status, initial):
@@ -93,12 +101,13 @@ class BlueDog:
         self.status = status
         self.initial = initial
 
-def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock, red_key, red_lock):
+def draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock, red_key, red_lock, finish):
     draw_grid()
     if (blue_key) : WIN.blit(BLUEKEY, (blue_key.x, blue_key.y))
     if (blue_lock) : WIN.blit(BLUELOCK, (blue_lock.x, blue_lock.y))
     if (red_key) : WIN.blit(REDKEY, (red_key.x, red_key.y))
     if (red_lock) : WIN.blit(REDLOCK, (red_lock.x, red_lock.y))
+    WIN.blit(FINISH, (finish.x, finish.y))
     WIN.blit(CAT, (cat.x, cat.y))
     WIN.blit(REDDOG, (orange_cat.x, orange_cat.y)) # Turning this off will simply make the orange_cat invisible
     for dog in blue_dogs:
@@ -143,14 +152,13 @@ def move_cat(keys_pressed, cat, boxes):
         for box in boxes:
             if cat.colliderect(box): cat.y -= VEL
 
-def move_red_dog(orange_cat, boxes, blue_lock, red_lock):
+def move_red_dog(orange_cat, boxes, blue_lock, red_lock, ghost_boxes):
     global last_trigger
     global move
     blue_lock_gone = False
     red_lock_gone = False
     time_now = pygame.time.get_ticks()
     if (time_now-last_trigger) > RED_DOG_MOVE_DELAY:
-        print("tick!")
         last_trigger = time_now
         move = random.randint(1,4)
         
@@ -183,6 +191,9 @@ def move_red_dog(orange_cat, boxes, blue_lock, red_lock):
             if orange_cat.colliderect(box) or blue_collision or red_collision:
                 orange_cat.y -= RED_DOG_VEL+5
                 move = random.randint(1, 4)
+        for gbox in ghost_boxes:
+            if orange_cat.colliderect(gbox):
+                orange_cat.y -= VEL
 
 def move_blue_dog(blue_dogs, boxes):
     for dog in blue_dogs:
@@ -248,23 +259,35 @@ def unlockRed(cat,  red_lock, has_red_key):
         else:
             cat.x += VEL
 
+def draw_win(text):
+    draw_text = DEATH_FONT.render(text, 1, GREEN)
+    background_text = pygame.Surface((draw_text.get_width(), draw_text.get_height()))
+    background_text.fill(BLACK)
+    background_text.blit(draw_text, (0,0))
+    WIN.blit(background_text, (WIDTH/2 - draw_text.get_width()/2, HEIGHT/2 - draw_text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(5000)
 
 def main():
-    BAKSO_MALAM_OST.play()
+    LAGU.play()
     cat = pygame.Rect(10,10, CAT_WIDTH, CAT_HEIGHT)
     orange_cat = pygame.Rect(720, 240, CAT_WIDTH, CAT_HEIGHT)
     boxes = []
     blue_dogs = []
+    ghost_boxes = []
     blue_key = pygame.Rect(360, 360, KEY_WIDTH, KEY_HEIGHT)
     blue_lock = pygame.Rect(240, 180, BOX_WIDTH, BOX_HEIGHT)
     red_key = pygame.Rect(840, 0, KEY_WIDTH, KEY_HEIGHT)
     red_lock = pygame.Rect(780, 480, BOX_WIDTH, BOX_HEIGHT)
+    finish = pygame.Rect(480, 480, 20, 20)
 
     for i in BOX_COORDS:
         boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
     for i in BLUE_DOG_COORDS:
         dog = BlueDog(pygame.Rect(i[0], i[1], DOG_WIDTH, DOG_HEIGHT), i[2], i[3])
         blue_dogs.append(dog)
+    for i in GHOST_BOX_COORDS:
+        ghost_boxes.append(pygame.Rect(i, (BOX_WIDTH, BOX_HEIGHT)))
 
     has_blue_key = False
     has_red_key = False
@@ -280,7 +303,7 @@ def main():
             
             if event.type == HIT_BLUE_DOG_EVENT:
                 HIT_BLUE_DOG_SFX.play()
-                BAKSO_MALAM_OST.stop()
+                LAGU.stop()
                 death("YOU DIED!")
                 main()
             
@@ -301,19 +324,28 @@ def main():
             if event.type == RED_LOCK_UNLOCK_EVENT:
                 LOCK_UNLOCK_SFX.play()
                 red_lock = None
+            
+            if event.type == WIN_EVENT:
+                WIN_SFX.play()
+                LAGU.stop()
+                draw_win("YOU WIN!")
+                pygame.quit()
+                quit()
 
         keys_pressed = pygame.key.get_pressed()
         move_cat(keys_pressed, cat, boxes)
-        move_red_dog(orange_cat, boxes, blue_lock, red_lock)
+        move_red_dog(orange_cat, boxes, blue_lock, red_lock, ghost_boxes)
         move_blue_dog(blue_dogs, boxes)
         pickupBlue(cat, blue_key)
         pickupRed(cat, red_key)
         unlockBlue(cat, blue_lock, has_blue_key)
         unlockRed(cat, red_lock, has_red_key)
-        draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock, red_key, red_lock)
+        draw_window(cat, orange_cat, boxes, blue_dogs, blue_key, blue_lock, red_key, red_lock, finish)
 
-        if cat.colliderect(orange_cat) :
+        if cat.colliderect(orange_cat):
             pygame.event.post(pygame.event.Event(HIT_BLUE_DOG_EVENT))
+        if cat.colliderect(finish):
+            pygame.event.post(pygame.event.Event(WIN_EVENT))
 
 if __name__ == "__main__":
     if MODE == "SMOOTH": FPS, VEL, DOG_VEL, RED_DOG_VEL = 60, 5, 2, 3
